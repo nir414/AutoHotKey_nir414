@@ -54,9 +54,47 @@ MouseMoveToActiveWindow()
 	
 	; 창 중앙위치 계산및 보정
 	WinGetPos, winX, winY, winW, winH, A
-	centerX := Round((winX + winW / 2) * (width / (workRight - workLeft)))
-	centerY := Round((winY + winH / 2) * (height / (workBottom - workTop)))
+	; centerX := Round((winX + winW / 2) * (width / (workRight - workLeft)))
+	; centerY := Round((winY + winH / 2) * (height / (workBottom - workTop)))
 
 	; 마우스를 해당 모니터의 중앙으로 이동
-	MouseMove, %centerX%, %centerY%
+	; 시작점과 끝점 설정
+	MouseGetPos, startX, startY
+	endX := winX + winW // 2, endY := winY + winH // 2
+	
+	; 이동에 걸릴 총 시간 (0.1초 = 100ms)
+	totalTime := 80
+
+	; 총 이동 거리 계산
+	totalDistanceX := endX - startX
+	totalDistanceY := endY - startY
+
+	; 이동 시작 시간 기록
+	startTime := A_TickCount
+
+	Loop
+	{
+		; 경과 시간 계산
+		elapsedTime := A_TickCount - startTime
+
+		; t는 경과 시간을 기준으로 0에서 1까지 변화
+		t := elapsedTime / totalTime
+		if (t > 1)  ; t가 1을 넘으면 목표에 도달했으므로 루프 종료
+			break
+
+		; 가속 곡선을 적용하여 t 값 증가 (여기서는 easeInQuad 형태의 가속 사용)
+		t := t * t
+
+		; t에 따라 현재 위치 계산
+		currentX := startX + totalDistanceX * t
+		currentY := startY + totalDistanceY * t
+
+		; 마우스 위치 업데이트
+		DllCall("User32.dll\SetCursorPos", "int", Round(currentX * (width / (workRight - workLeft))), "int", Round(currentY * (height / (workBottom - workTop))))
+
+		; 짧은 딜레이 추가로 부드러운 이동
+		Sleep, 1
+	}
+
+	; MouseMove, %centerX%, %centerY%
 }
