@@ -7,14 +7,17 @@ AltTabPressed := false
 CoordMode, Mouse, Screen
 
 ~LAlt & Tab::
-	AltTabPressed := true  ; Alt+Tab이 눌렸음을 표시
 	Send, {Alt down}{Tab}
 	KeyWait, Tab, D        ; Tab 키가 눌려 있는 동안 계속 기다림
 	
-	; 주 디스플레이 해상도
-	width := DllCall("GetSystemMetrics", "int", 0) // 2
-	height := DllCall("GetSystemMetrics", "int", 1) // 2
-	MouseMove, %width%, %height%
+	if (!AltTabPressed) {
+		; 주 디스플레이 해상도
+		width := DllCall("GetSystemMetrics", "int", 0) // 2
+		height := DllCall("GetSystemMetrics", "int", 1) // 2
+		MouseMove, %width%, %height%
+	}
+	
+	AltTabPressed := true  ; Alt+Tab이 눌렸음을 표시
 	return
 
 ~LAlt Up::
