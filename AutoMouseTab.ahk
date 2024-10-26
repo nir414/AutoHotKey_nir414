@@ -23,15 +23,27 @@ CoordMode, Mouse, Screen
 ~LAlt Up::
 	; Alt 키가 놓일 때 Alt+Tab 조합이 사용된 경우에만 마우스 이동
 	if (AltTabPressed) {
-		AltTabPressed := false  ; 플래그 초기화
+		; 플래그 초기화
+		AltTabPressed := false
 		Send, {Alt up}          ; Alt 릴리스
-		Sleep, 10              ; 창 전환 후 마우스 이동을 위해 잠시 대기
+		; Sleep, 10              ; 창 전환 후 마우스 이동을 위해 잠시 대기
+		MouseMoveToActiveWindow()
+	}
+	return
+
+; 마우스 좌클릭 시 마우스 이동 트리거
+~LAlt & LButton::
+	if (AltTabPressed) {
+		; 플래그 초기화
+		AltTabPressed := false
+		Send {Blind}{LButton}  ; Alt 상태에서 클릭을 허용
+		Send, {Alt up} ; Alt 릴리스
 		MouseMoveToActiveWindow()
 	}
 	return
 
 MouseMoveToActiveWindow()
-{
+{  
 	; 메모리 공간을 40바이트 크기로 할당
 	VarSetCapacity(monitorInfo, 40), NumPut(40, monitorInfo)
 
@@ -49,7 +61,7 @@ MouseMoveToActiveWindow()
 	workBottom := NumGet(monitorInfo, 32, "Int")
 	
 	; 주 디스플레이 해상도
-	width := DllCall("GetSystemMetrics", "int", 0)  
+	width := DllCall("GetSystemMetrics", "int", 0) 
 	height := DllCall("GetSystemMetrics", "int", 1)
 	
 	; 창 중앙위치 계산및 보정
