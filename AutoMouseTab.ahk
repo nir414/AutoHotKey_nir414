@@ -8,7 +8,7 @@ CoordMode, Mouse, Screen
 
 ~LAlt & Tab::
 	Send, {Alt down}{Tab}
-	KeyWait, Tab, D        ; Tab 키가 눌려 있는 동안 계속 기다림
+	KeyWait, Tab, D		; Tab 키가 눌려 있는 동안 계속 기다림
 	
 	if (!AltTabPressed) {
 		; 주 디스플레이 해상도
@@ -24,9 +24,9 @@ CoordMode, Mouse, Screen
 	; Alt 키가 놓일 때 Alt+Tab 조합이 사용된 경우에만 마우스 이동
 	if (AltTabPressed) {
 		; 플래그 초기화
-		AltTabPressed := false
-		Send, {Alt up}          ; Alt 릴리스
-		; Sleep, 10              ; 창 전환 후 마우스 이동을 위해 잠시 대기
+		AltTabPressed := false		; 플래그 초기화
+		Send, {Alt up}						; Alt 릴리스
+		Sleep, 10									; 창 전환 후 마우스 이동을 위해 잠시 대기
 		MouseMoveToActiveWindow()
 	}
 	return
@@ -36,8 +36,9 @@ CoordMode, Mouse, Screen
 	if (AltTabPressed) {
 		; 플래그 초기화
 		AltTabPressed := false
-		Send {Blind}{LButton}  ; Alt 상태에서 클릭을 허용
-		Send, {Alt up} ; Alt 릴리스
+		Send {Blind}{LButton}		; Alt 상태에서 클릭을 허용
+		Send, {Alt up}					; Alt 릴리스
+		Sleep, 10								; 창 전환 후 마우스 이동을 위해 잠시 대기
 		MouseMoveToActiveWindow()
 	}
 	return
@@ -64,7 +65,7 @@ MouseMoveToActiveWindow()
 	width := DllCall("GetSystemMetrics", "int", 0) 
 	height := DllCall("GetSystemMetrics", "int", 1)
 	
-	; 창 중앙위치 계산및 보정
+	; 창 중앙위치 계산 및 보정
 	WinGetPos, winX, winY, winW, winH, A
 	; centerX := Round((winX + winW / 2) * (width / (workRight - workLeft)))
 	; centerY := Round((winY + winH / 2) * (height / (workBottom - workTop)))
