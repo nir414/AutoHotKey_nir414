@@ -26,7 +26,7 @@ CoordMode, Mouse, Screen
 		; 플래그 초기화
 		AltTabPressed := false		; 플래그 초기화
 		Send, {Alt up}						; Alt 릴리스
-		Sleep, 10									; 창 전환 후 마우스 이동을 위해 잠시 대기
+		; Sleep, 10									; 창 전환 후 마우스 이동을 위해 잠시 대기
 		MouseMoveToActiveWindow()
 	}
 	return
@@ -38,20 +38,32 @@ CoordMode, Mouse, Screen
 		AltTabPressed := false
 		Send {Blind}{LButton}		; Alt 상태에서 클릭을 허용
 		Send, {Alt up}					; Alt 릴리스
-		Sleep, 10								; 창 전환 후 마우스 이동을 위해 잠시 대기
+		; Sleep, 10								; 창 전환 후 마우스 이동을 위해 잠시 대기
 		MouseMoveToActiveWindow()
 	}
 	return
 
 MouseMoveToActiveWindow()
 {  
+	; 0.5초 대기 제한 설정
+	maxWaitTime := 500
+	startTime := A_TickCount
 	; 메모리 공간을 40바이트 크기로 할당
 	VarSetCapacity(monitorInfo, 40), NumPut(40, monitorInfo)
 
-	; 활성 창의 핸들을 가져옴
-	winHandle := WinExist("A")
+	; 창의 위치와 크기를 가져올 때까지 대기, 최대 0.5초
+	WinGetPos, winX, winY, winW, winH, A
+	while (winX = "" or winY = "" winW = "" or winH = "") {
+		if (A_TickCount - startTime > maxWaitTime) {
+			MsgBox, 창의 위치나 크기를 가져오지 못했습니다. 마우스 이동을 취소합니다.
+			return  ; 마우스 이동 취소
+		}
+		; Sleep, 10
+		WinGetPos, winX, winY, winW, winH, A
+	}
 	
 	; 현재 창이 어느 모니터에 있는지 확인
+	winHandle := WinExist("A")
 	monitorHandle := DllCall("MonitorFromWindow", "Ptr", winHandle, "UInt", 0x2)
 	DllCall("GetMonitorInfo", "Ptr", monitorHandle, "Ptr", &monitorInfo)
 	
@@ -92,7 +104,7 @@ MouseMoveToActiveWindow()
 
 		; t는 경과 시간을 기준으로 0에서 1까지 변화
 		t := elapsedTime / totalTime
-		if (t > 1)  ; t가 1을 넘으면 목표에 도달했으므로 루프 종료
+		if (t > 1)  ; 목표에 도달하면 루프 종료
 			break
 
 		; 가속 곡선을 적용하여 t 값 증가 (여기서는 easeInQuad 형태의 가속 사용)
