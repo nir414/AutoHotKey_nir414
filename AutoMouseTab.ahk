@@ -55,7 +55,8 @@ MouseMoveToActiveWindow()
 	WinGetPos, winX, winY, winW, winH, A
 	while (winX = "" or winY = "" winW = "" or winH = "") {
 		if (A_TickCount - startTime > maxWaitTime) {
-			MsgBox, 창의 위치나 크기를 가져오지 못했습니다. 마우스 이동을 취소합니다.
+			; debug
+			; MsgBox, Failed to retrieve the window's position or size. Mouse movement canceled.`nWinX: %winX%`nWinY: %winY%`nWinW: %winW%`nWinH: %winH%
 			return  ; 마우스 이동 취소
 		}
 		; Sleep, 10
