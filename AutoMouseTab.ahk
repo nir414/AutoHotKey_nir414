@@ -55,6 +55,9 @@ MouseMoveToActiveWindow()
 	WinGetPos, winX, winY, winW, winH, A
 	while (winX = "" or winY = "" winW = "" or winH = "") {
 		if (A_TickCount - startTime > maxWaitTime) {
+			ToolTip, Failed to get window size or position. Movement canceled.`nWinX: %winX% | WinY: %winY% | WinW: %winW% | WinH: %winH%
+			Sleep, 2000 ; 1초 동안 ToolTip 표시
+			ToolTip  ; ToolTip 숨기기
 			; debug
 			; MsgBox, Failed to retrieve the window's position or size. Mouse movement canceled.`nWinX: %winX%`nWinY: %winY%`nWinW: %winW%`nWinH: %winH%
 			return  ; 마우스 이동 취소
