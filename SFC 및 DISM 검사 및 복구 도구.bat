@@ -4,12 +4,12 @@ title SFC 및 DISM 검사 및 복구 도구
 echo 관리자 권한 검사
 if not "%1"=="am_admin" (powershell start -verb runas '%0' am_admin & exit /b)
 mode con cols=65 lines=15
-powershell -Command "$Host.UI.RawUI.BufferSize = New-Object Management.Automation.Host.Size(100, 9999)"
+powershell -Command "$Host.UI.RawUI.BufferSize = New-Object Management.Automation.Host.Size(65, 9999)"
 
 cls
-echo =================================================================
-echo                SFC 및 DISM 검사 및 복구 도구 시작
-echo =================================================================
+echo ==============================================================
+echo               SFC 및 DISM 검사 및 복구 도구 시작              
+echo ==============================================================
 echo.
 
 :: SFC 검사 결과 로그 저장
@@ -42,9 +42,9 @@ REM echo DISM 검사 결과:
 REM type "%temp%\dism_result.log"
 REM echo.
 
-echo =================================================================
-echo                  모든 작업이 완료되었습니다.
-echo =================================================================
+echo ==============================================================
+echo                   모든 작업이 완료되었습니다                  
+echo ==============================================================
 pause
 
 
