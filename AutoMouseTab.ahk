@@ -45,8 +45,8 @@ CoordMode, Mouse, Screen
 
 MouseMoveToActiveWindow()
 {  
-	; 0.5초 대기 제한 설정
-	maxWaitTime := 500
+	; 0.06초 대기 제한 설정
+	maxWaitTime := 60
 	startTime := A_TickCount
 	; 메모리 공간을 40바이트 크기로 할당
 	VarSetCapacity(monitorInfo, 40), NumPut(40, monitorInfo)
@@ -56,7 +56,7 @@ MouseMoveToActiveWindow()
 	while (winX = "" or winY = "" winW = "" or winH = "") {
 		if (A_TickCount - startTime > maxWaitTime) {
 			ToolTip, Failed to get window size or position. Movement canceled.`nWinX: %winX% | WinY: %winY% | WinW: %winW% | WinH: %winH%
-			Sleep, 2000 ; 1초 동안 ToolTip 표시
+			Sleep, 1000 ; 1초 동안 ToolTip 표시
 			ToolTip  ; ToolTip 숨기기
 			; debug
 			; MsgBox, Failed to retrieve the window's position or size. Mouse movement canceled.`nWinX: %winX%`nWinY: %winY%`nWinW: %winW%`nWinH: %winH%
@@ -92,7 +92,7 @@ MouseMoveToActiveWindow()
 	endX := winX + winW // 2, endY := winY + winH // 2
 	
 	; 이동에 걸릴 총 시간 (0.1초 = 100ms)
-	totalTime := 80
+	totalTime := 60
 
 	; 총 이동 거리 계산
 	totalDistanceX := endX - startX
