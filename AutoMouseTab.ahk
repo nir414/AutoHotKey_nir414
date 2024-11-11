@@ -53,7 +53,8 @@ MouseMoveToActiveWindow()
 
 	; 창의 위치와 크기를 가져올 때까지 대기, 최대 0.5초
 	WinGetPos, winX, winY, winW, winH, A
-	while (winX = "" or winY = "" winW = "" or winH = "") {
+	; while (winX = "" or winY = "" winW = "" or winH = "") {
+	while (!winX or !winY or !winW or !winH) {
 		if (A_TickCount - startTime > maxWaitTime) {
 			ToolTip, Failed to get window size or position. Movement canceled.`nWinX: %winX% | WinY: %winY% | WinW: %winW% | WinH: %winH%
 			Sleep, 1000 ; 1초 동안 ToolTip 표시
