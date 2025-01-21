@@ -8,15 +8,15 @@ CoordMode, Mouse, Screen
 
 ~LAlt & Tab::
 	Send, {Alt down}{Tab}
-	KeyWait, Tab, D		; Tab 키가 눌려 있는 동안 계속 기다림
-	
-	if (!AltTabPressed) {
+	; KeyWait, Tab, D		; Tab 키가 눌려 있는 동안 계속 기다림
+
+	; if (!AltTabPressed) {
 		; 주 디스플레이 해상도
-		width := DllCall("GetSystemMetrics", "int", 0) // 2
-		height := DllCall("GetSystemMetrics", "int", 1) // 2
-		MouseMove, %width%, %height%
-	}
-	
+		; width := DllCall("GetSystemMetrics", "int", 0) // 2
+		; height := DllCall("GetSystemMetrics", "int", 1) // 2
+		; MouseMove, %width%, %height%
+	; }
+
 	AltTabPressed := true  ; Alt+Tab이 눌렸음을 표시
 	return
 
@@ -44,7 +44,7 @@ CoordMode, Mouse, Screen
 	return
 
 MouseMoveToActiveWindow()
-{  
+{
 	; 0.06초 대기 제한 설정
 	maxWaitTime := 60
 	startTime := A_TickCount
@@ -66,22 +66,22 @@ MouseMoveToActiveWindow()
 		; Sleep, 10
 		WinGetPos, winX, winY, winW, winH, A
 	}
-	
+
 	; 현재 창이 어느 모니터에 있는지 확인
 	winHandle := WinExist("A")
 	monitorHandle := DllCall("MonitorFromWindow", "Ptr", winHandle, "UInt", 0x2)
 	DllCall("GetMonitorInfo", "Ptr", monitorHandle, "Ptr", &monitorInfo)
-	
+
 	; 모니터의 작업 영역 좌표 가져오기
 	workLeft := NumGet(monitorInfo, 20, "Int")
 	workTop := NumGet(monitorInfo, 24, "Int")
 	workRight := NumGet(monitorInfo, 28, "Int")
 	workBottom := NumGet(monitorInfo, 32, "Int")
-	
+
 	; 주 디스플레이 해상도
-	width := DllCall("GetSystemMetrics", "int", 0) 
+	width := DllCall("GetSystemMetrics", "int", 0)
 	height := DllCall("GetSystemMetrics", "int", 1)
-	
+
 	; 창 중앙위치 계산 및 보정
 	WinGetPos, winX, winY, winW, winH, A
 	; centerX := Round((winX + winW / 2) * (width / (workRight - workLeft)))
@@ -91,7 +91,7 @@ MouseMoveToActiveWindow()
 	; 시작점과 끝점 설정
 	MouseGetPos, startX, startY
 	endX := winX + winW // 2, endY := winY + winH // 2
-	
+
 	; 이동에 걸릴 총 시간 (0.1초 = 100ms)
 	totalTime := 60
 
