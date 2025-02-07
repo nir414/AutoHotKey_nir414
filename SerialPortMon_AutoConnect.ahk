@@ -22,6 +22,10 @@ IfWinExist, SerialPortMon
 				Sleep, 20  ; 클릭 후 잠시 대기
 				; 새로 열린 연결 대화상자 확인하고 버튼 클릭
 				checkAndClickSecondWindow()
+				IfWinExist, SerialPortMon
+				{
+					ExitApp  ; 첫 번째 창이 없으면 프로그램을 종료
+				}
 			}
 			else
 			{
