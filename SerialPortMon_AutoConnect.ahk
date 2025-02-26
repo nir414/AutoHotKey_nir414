@@ -10,7 +10,7 @@ SetTitleMatchMode, 3  ; 창 제목을 부분적으로 매칭할 수 있도록 설정
 ; ahk_id 1708630
 ; Main code
 
-debugMode := 1
+debugMode := 0
 while (true)
 {
 	IfWinExist, ahk_exe SerialPortMon.exe
