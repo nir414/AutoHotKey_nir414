@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "autohotkey", // 최신 버전에 맞게 수정
+            "request": "launch",
+            "name": "AutoHotkey 디버거",
+            "program": "${file}",
+            "stopOnEntry": true,
+            "runtime": "C:\\Program Files\\AutoHotkey\\v2\\AutoHotkey64.exe" // 올바른 경로로 수정
+        }
+    ]
+}
