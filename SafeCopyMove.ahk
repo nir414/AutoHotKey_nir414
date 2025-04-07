@@ -3,16 +3,17 @@
 ; === GUI 생성 ===
 myGui := Gui("+AlwaysOnTop +Resize", "SafeFolderSwap")
 
-myGui.Add("Text", , "삭제할 폴더 경로:")
-deleteEdit := myGui.Add("Edit", "w300 vDeleteEdit")
-myGui.Add("Button", "yp x+5", "찾아보기").OnEvent("Click", (*) => BrowseFolder(deleteEdit))
+myGui.Add("GroupBox", "w400 h100 Section", "폴더 경로 설정")
+myGui.Add("Text", "x10 y30", "삭제할 폴더 경로:")
+deleteEdit := myGui.Add("Edit", "x150 y25 w200 vDeleteEdit")
+myGui.Add("Button", "x360 y25", "찾아보기").OnEvent("Click", (*) => BrowseFolder(deleteEdit))
 
-myGui.Add("Text", , "복사할 폴더 경로:")
-copyEdit := myGui.Add("Edit", "w300 vCopyEdit")
-myGui.Add("Button", "yp x+5", "찾아보기").OnEvent("Click", (*) => BrowseFolder(copyEdit))
+myGui.Add("Text", "x10 y60", "복사할 폴더 경로:")
+copyEdit := myGui.Add("Edit", "x150 y55 w200 vCopyEdit")
+myGui.Add("Button", "x360 y55", "찾아보기").OnEvent("Click", (*) => BrowseFolder(copyEdit))
 
-myGui.Add("Button", "w100 Section", "▶ 실행").OnEvent("Click", (*) => ExecuteSwap(deleteEdit.Value, copyEdit.Value))
-statusText := myGui.Add("Text", "xs w400 cBlue vStatusText", "")
+myGui.Add("Button", "x10 y120 w100", "▶ 실행").OnEvent("Click", (*) => ExecuteSwap(deleteEdit.Value, copyEdit.Value))
+statusText := myGui.Add("Text", "x120 y125 w300 cBlue vStatusText", "")
 
 myGui.OnEvent("Size", (*) => GuiResized(myGui))
 myGui.Show()
