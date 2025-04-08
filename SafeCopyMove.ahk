@@ -66,7 +66,19 @@ GuiResized(gui) {
     DllCall("GetClientRect", "ptr", hwnd, "ptr", rect)
     guiWidth := NumGet(rect, 8, "int") ; rect.right 값
 
-    gui["DeleteEdit"].Move(, , guiWidth - 120) ; Edit 컨트롤 너비 조정
-    gui["CopyEdit"].Move(, , guiWidth - 120)
-    gui["StatusText"].Move(, , guiWidth - 20) ; 상태 텍스트 너비 조정
+    ; 최소 너비를 설정하여 텍스트 박스가 너무 작아지지 않도록 함
+    minWidth := 200
+    newWidth := guiWidth - 370 ; 버튼 위치(360) + 오른쪽 여백(10)
+
+    if (newWidth < minWidth) {
+        newWidth := minWidth
+    }
+
+    ; Edit 컨트롤 너비 조정
+    deleteEdit.Move(, , newWidth) ; x150 기준으로 오른쪽 여백 유지
+    copyEdit.Move(, , newWidth)
+    statusText.Move(, , guiWidth - 20) ; 상태 텍스트 너비 조정
 }
+
+myGui.Show()
+GuiResized(myGui) ; GUI 초기 크기 조정
