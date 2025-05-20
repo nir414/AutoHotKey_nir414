@@ -6,11 +6,11 @@ myGui := Gui("+AlwaysOnTop +Resize", "SafeFolderSwap")
 myGui.Add("GroupBox", "w400 h100 Section", "폴더 경로 설정")
 myGui.Add("Text", "x10 y30", "삭제할 폴더 경로:")
 deleteEdit := myGui.Add("Edit", "x150 y25 w200 vDeleteEdit")
-myGui.Add("Button", "x360 y25", "찾아보기").OnEvent("Click", (*) => BrowseFolder(deleteEdit))
+deleteButton := myGui.Add("Button", "x360 y25", "찾아보기").OnEvent("Click", (*) => BrowseFolder(deleteEdit))
 
 myGui.Add("Text", "x10 y60", "복사할 폴더 경로:")
 copyEdit := myGui.Add("Edit", "x150 y55 w200 vCopyEdit")
-myGui.Add("Button", "x360 y55", "찾아보기").OnEvent("Click", (*) => BrowseFolder(copyEdit))
+copyButton := myGui.Add("Button", "x360 y55", "찾아보기").OnEvent("Click", (*) => BrowseFolder(copyEdit))
 
 myGui.Add("Button", "x10 y120 w100", "▶ 실행").OnEvent("Click", (*) => ExecuteSwap(deleteEdit.Value, copyEdit.Value))
 statusText := myGui.Add("Text", "x120 y125 w300 cBlue vStatusText", "")
@@ -78,6 +78,12 @@ GuiResized(gui) {
     deleteEdit.Move(, , newWidth) ; x150 기준으로 오른쪽 여백 유지
     copyEdit.Move(, , newWidth)
     statusText.Move(, , guiWidth - 20) ; 상태 텍스트 너비 조정
+
+    ; 버튼 위치 조정
+    deleteButtonX := 150 + newWidth + 10 ; 텍스트 박스 끝 + 여백(10)
+    copyButtonX := 150 + newWidth + 10
+    deleteButton.Move(deleteButtonX, ) ; X 위치만 조정
+    copyButton.Move(copyButtonX, ) ; X 위치만 조정
 }
 
 myGui.Show()
