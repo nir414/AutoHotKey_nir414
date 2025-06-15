@@ -10,22 +10,20 @@ targetExe := "nightreign.exe"
 currentExe := ""
 
 ; ─ GUI 초기화 ─
-Gui, +AlwaysOnTop -SysMenu +ToolWindow -Caption
-Gui, Margin, 10, 10
-Gui, Font, s10 Bold, Consolas
-Gui, Add, Text, vStatusText w250, 상태: 중지
-Gui, Add, Text, vDebugText w250, wDown: false | altDown: false | toggleWalk: false
-Gui, Add, Text, vProcText w250, 프로세스: (알 수 없음)
-Gui, Show, x10 y10 NoActivate
+Gui, +AlwaysOnTop -SysMenu +ToolWindow -Caption -Theme
+Gui, Margin, 4, 2
+Gui, Font, s8, Consolas
+
+Gui, Add, Text, vStatusText w100, ● 중지
+Gui, Add, Text, vProcText w100, 프로세스: (알 수 없음)
+Gui, Show, x10 y1010 NoActivate
 
 SetTimer, WatchActiveWindow, 500
 
 ; ─ 상태 표시 갱신 함수 ─
 UpdateDebug() {
 	global wDown, altDown, toggleWalk, currentExe
-	GuiControl,, DebugText, % "wDown: " . (wDown ? "true" : "false")
-		. " | altDown: " . (altDown ? "true" : "false") . "`n"
-		. "toggleWalk: " . (toggleWalk ? "true" : "false")
+	GuiControl,, StatusText, % (toggleWalk ? "● 이동" : "● 중지")
 	GuiControl,, ProcText, % "프로세스: " . currentExe
 }
 
