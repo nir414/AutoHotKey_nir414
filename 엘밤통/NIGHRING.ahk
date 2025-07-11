@@ -53,8 +53,6 @@ StopRunning() {
 	toggleWalk := false
 	GuiControl,, StatusText, 상태: 중지
 	UpdateDebug()
-	Sleep, 10
-	SendInput, {y up}
 }
 
 ; ─ 타겟 창 확인 ─
@@ -124,6 +122,8 @@ return
 		return
 	if toggleWalk
 		StopRunning()
+		SendInput, {y Down}
+		SendInput, {y up}
 	SendInput, {h down}
 	UpdateDebug()
 return
