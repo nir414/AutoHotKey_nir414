@@ -1,3 +1,12 @@
+# 콘솔 창 크기 설정 (귀여운 작은 창)
+try {
+	$host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 15)
+	$host.UI.RawUI.BufferSize = New-Object System.Management.Automation.Host.Size(60, 300)
+	$host.UI.RawUI.WindowTitle = "? 이더넷 IP 설정 도구"
+} catch {
+	# 창 크기 설정 실패시 무시
+}
+
 # 관리자 권한 체크
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)) {
 	Write-Host "? 이 스크립트는 관리자 권한으로 실행되어야 합니다."
@@ -137,7 +146,8 @@ do {
 
 	Write-Host "`n[IP목록] 설정 가능한 IP 목록:"
 	for ($i = 0; $i -lt $ipEntries.Count; $i++) {
-		Write-Host "[$i] IP: $($ipEntries[$i].IP) / 서브넷: $($ipEntries[$i].SM)"
+		$comment = if ($ipEntries[$i].Comment) { " - $($ipEntries[$i].Comment)" } else { "" }
+		Write-Host "[$i] IP: $($ipEntries[$i].IP) / 서브넷: $($ipEntries[$i].SM)$comment"
 	}
 	$ipSelect = Read-Host "`n적용할 IP 번호를 입력하세요"
 	if ($ipSelect -notmatch '^\d+$' -or $ipSelect -ge $ipEntries.Count) {
@@ -147,6 +157,9 @@ do {
 	$chosen = $ipEntries[$ipSelect]
 	$ip = $chosen.IP
 	$subnet = $chosen.SM
+	$comment = if ($chosen.Comment) { $chosen.Comment } else { "설명 없음" }
+
+	Write-Host "`n[선택한IP] $comment"
 
 	if (-not ($ip -and $subnet)) {
 		Write-Host "? IP 또는 서브넷 마스크가 비어 있습니다."
