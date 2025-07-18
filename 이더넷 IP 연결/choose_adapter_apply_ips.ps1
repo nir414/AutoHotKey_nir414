@@ -1,3 +1,5 @@
+# TODO: 인터넷 연결 실패 시 동작 검증 필요 (추후 업데이트 예정)
+
 # 콘솔 창 크기 설정
 try {
 	$host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 15)
@@ -42,9 +44,10 @@ do {
 	Write-Host "[1] 인터넷 연결 복원 (DHCP 초기화)"
 	Write-Host "[2] 로봇 연결용 수동 IP 설정"
 	Write-Host "[3] 어댑터 재시작"
+	Write-Host "[4] 오토 재부팅 모드 (인터넷 연결 복구)"
 	Write-Host "[9] 프로그램 종료"
 	$mode = Read-Host "`n원하는 모드 번호를 입력하세요"
-	if ($mode -notin '0','1','2','3','9') {
+	if ($mode -notin '0','1','2','3','4','9') {
 		Write-Host "잘못된 선택입니다."
 		continue
 	}
@@ -449,6 +452,37 @@ do {
 	Write-Host "`n[완료] 모든 작업 완료!"
 	Write-Host "[대기] 아무 키나 누르면 메뉴로 돌아갑니다..."
 	pause
+	}
+
+	# 오토 재부팅 모드
+	if ($mode -eq '4') {
+		Write-Host "`n[오토재부팅] 인터넷 연결 확인 및 자동 어댑터 재부팅 시작..." -ForegroundColor Cyan
+	   do {
+			# 어댑터 재부팅 (Disable -> Enable) 수행
+			Write-Host "[재부팅] 어댑터 재시작 중: $($adapter.Name)..." -ForegroundColor Yellow
+			# Start-Sleep -Seconds 1
+			Disable-NetAdapter -Name $adapter.Name -Confirm:$false -ErrorAction SilentlyContinue
+			Enable-NetAdapter -Name $adapter.Name -ErrorAction SilentlyContinue
+			Start-Sleep -Seconds 10
+			Write-Host "[대기] 재부팅 완료 후 인터넷 연결 확인 중..." -ForegroundColor Yellow
+
+		   # 어댑터 연결 상태 확인 (Test-Connection 사용)
+		   $ipConfig = Get-NetIPConfiguration -InterfaceAlias $adapter.Name -ErrorAction SilentlyContinue
+		   $gateway = if ($ipConfig.IPv4DefaultGateway) { $ipConfig.IPv4DefaultGateway.NextHop } else { $null }
+		   if ($gateway) {
+			   Write-Host "[로그] Test-Connection: 대상=$gateway" -ForegroundColor Cyan
+			   $pingResult = Test-Connection -ComputerName $gateway -Count 1 -Quiet -ErrorAction SilentlyContinue
+			   Write-Host "[상세] ping 성공 여부: $pingResult" -ForegroundColor Cyan
+			   if ($pingResult) {
+				   Write-Host "[성공] 유선 어댑터로 인터넷 연결 확인됨" -ForegroundColor Green
+				   break
+			   }
+		   }
+	   } while ($true)
+		Write-Host "`n[완료] 자동 재부팅 모드 종료, 인터넷 연결 복구됨."
+		Write-Host "[대기] 아무 키나 누르면 메뉴로 돌아갑니다..."
+		pause
+		continue
 	}
 
 } while ($true)
