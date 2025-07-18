@@ -1,5 +1,3 @@
-# TODO: 인터넷 연결 실패 시 동작 검증 필요 (추후 업데이트 예정)
-
 # 콘솔 창 크기 설정
 try {
 	$host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 15)
