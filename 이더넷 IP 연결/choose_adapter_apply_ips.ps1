@@ -402,12 +402,50 @@ do {
 	$prefix = Get-PrefixLength $subnet
 	$gateway = ($ip -replace '\d+$','1')
 
+	function Test-AdapterConnectivity {
+		param (
+			[Parameter(Mandatory=$true)]
+			[string]$LocalIP,
+			[string]$Target = "8.8.8.8",
+			[int]$Port = 53,
+			[int]$Timeout = 3000
+		)
+		try {
+			$localIPObj = [System.Net.IPAddress]::Parse($LocalIP)
+			$localEndPoint = New-Object System.Net.IPEndPoint($localIPObj, 0)
+			$tcpClient = New-Object System.Net.Sockets.TcpClient
+			$tcpClient.Client.Bind($localEndPoint)
+			$asyncResult = $tcpClient.BeginConnect($Target, $Port, $null, $null)
+			$success = $asyncResult.AsyncWaitHandle.WaitOne($Timeout)
+			if ($success -and $tcpClient.Connected) {
+				return $true
+			} else {
+				return $false
+			}
+		}
+		catch {
+			return $false
+		}
+		finally {
+			if ($tcpClient) {
+				$tcpClient.Close()
+			}
+		}
+	}
 	# 현재 IP 정보 표시
 	$currentIP = Get-NetIPAddress -InterfaceAlias $adapter.Name -AddressFamily IPv4 -ErrorAction SilentlyContinue
 	if ($currentIP) {
 		Write-Host "`n[현재IP] 현재 IP: $($currentIP.IPAddress)"
 	}
 
+	# 어댑터의 유효 IP(169.254 제외)로 외부 TCP 연결 테스트
+	$validAddr = Get-NetIPAddress -InterfaceAlias $adapter.Name -AddressFamily IPv4 | Where-Object { $_.IPAddress -notmatch '^169\.254\.' } | Select-Object -First 1
+	if ($validAddr) {
+		$tcpResult = Test-AdapterConnectivity -LocalIP $validAddr.IPAddress
+		Write-Host "[TCP 연결 테스트] 어댑터($($validAddr.IPAddress))로 외부 연결 성공: $tcpResult" -ForegroundColor Cyan
+	} else {
+		Write-Host "유효한 어댑터 IP가 없습니다." -ForegroundColor Yellow
+	}
 	Write-Host "`n[IP제거] 기존 IP 제거 중..."
 	Get-NetIPAddress -InterfaceAlias $adapter.Name -AddressFamily IPv4 -ErrorAction SilentlyContinue | Remove-NetIPAddress -Confirm:$false -ErrorAction SilentlyContinue
 
@@ -456,27 +494,61 @@ do {
 
 	# 오토 재부팅 모드
 	if ($mode -eq '4') {
-		Write-Host "`n[오토재부팅] 인터넷 연결 확인 및 자동 어댑터 재부팅 시작..." -ForegroundColor Cyan
-	   do {
-			# 어댑터 재부팅 (Disable -> Enable) 수행
-			Write-Host "[재부팅] 어댑터 재시작 중: $($adapter.Name)..." -ForegroundColor Yellow
-			# Start-Sleep -Seconds 1
-			Disable-NetAdapter -Name $adapter.Name -Confirm:$false -ErrorAction SilentlyContinue
-			Enable-NetAdapter -Name $adapter.Name -ErrorAction SilentlyContinue
-			Start-Sleep -Seconds 10
-			Write-Host "[대기] 재부팅 완료 후 인터넷 연결 확인 중..." -ForegroundColor Yellow
-
-		   # 어댑터 연결 상태 확인 (Test-Connection 사용)
-		   $ipConfig = Get-NetIPConfiguration -InterfaceAlias $adapter.Name -ErrorAction SilentlyContinue
-		   $gateway = if ($ipConfig.IPv4DefaultGateway) { $ipConfig.IPv4DefaultGateway.NextHop } else { $null }
-		   if ($gateway) {
-			   Write-Host "[로그] Test-Connection: 대상=$gateway" -ForegroundColor Cyan
-			   $pingResult = Test-Connection -ComputerName $gateway -Count 1 -Quiet -ErrorAction SilentlyContinue
-			   Write-Host "[상세] ping 성공 여부: $pingResult" -ForegroundColor Cyan
-			   if ($pingResult) {
-				   Write-Host "[성공] 유선 어댑터로 인터넷 연결 확인됨" -ForegroundColor Green
-				   break
+	   Write-Host "`n[오토재부팅] 인터넷 연결 확인 및 자동 어댑터 재부팅 시작..." -ForegroundColor Cyan
+	   function Test-AdapterConnectivity {
+		   param (
+			   [Parameter(Mandatory=$true)]
+			   [string]$LocalIP,
+			   [string]$Target = "8.8.8.8",
+			   [int]$Port = 53,
+			   [int]$Timeout = 3000
+		   )
+		   try {
+			   $localIPObj = [System.Net.IPAddress]::Parse($LocalIP)
+			   $localEndPoint = New-Object System.Net.IPEndPoint($localIPObj, 0)
+			   $tcpClient = New-Object System.Net.Sockets.TcpClient
+			   $tcpClient.Client.Bind($localEndPoint)
+			   $asyncResult = $tcpClient.BeginConnect($Target, $Port, $null, $null)
+			   $success = $asyncResult.AsyncWaitHandle.WaitOne($Timeout)
+			   if ($success -and $tcpClient.Connected) {
+				   return $true
+			   } else {
+				   return $false
 			   }
+		   }
+		   catch {
+			   return $false
+		   }
+		   finally {
+			   if ($tcpClient) {
+				   $tcpClient.Close()
+			   }
+		   }
+	   }
+	   do {
+		   # 어댑터 재부팅 (Disable -> Enable) 수행
+		   Write-Host "[재부팅] 어댑터 재시작 중: $($adapter.Name)..." -ForegroundColor Yellow
+		   Disable-NetAdapter -Name $adapter.Name -Confirm:$false -ErrorAction SilentlyContinue
+		   Enable-NetAdapter -Name $adapter.Name -ErrorAction SilentlyContinue
+		   Start-Sleep -Seconds 15
+		   Write-Host "[대기] 재부팅 완료 후 인터넷 연결 확인 중..." -ForegroundColor Yellow
+
+		   # --- 네트워크 연결 상태 사전 검증 및 TCP 연결 테스트 ---
+		   $netAdapter = Get-NetAdapter -Name $adapter.Name -ErrorAction SilentlyContinue
+		   $addrs = Get-NetIPAddress -InterfaceAlias $adapter.Name -AddressFamily IPv4 |
+					Where-Object { $_.IPAddress -notmatch '^169\.254\.' }
+		   $route = Get-NetRoute -DestinationPrefix '0.0.0.0/0' -AddressFamily IPv4 |
+					Where-Object InterfaceAlias -EQ $adapter.Name
+		   if ($netAdapter.Status -ne 'Up' -or $netAdapter.MediaConnectionState -ne 'Connected' -or -not $addrs -or -not $route) {
+			   Write-Host "[경고] 이더넷 네트워크 미연결" -ForegroundColor Yellow
+			   continue
+		   }
+		   $adapterIP = ($addrs | Select-Object -First 1).IPAddress
+		   $tcpResult = Test-AdapterConnectivity -LocalIP $adapterIP
+		   Write-Host "[TCP 연결 테스트] 어댑터($adapterIP)로 외부 연결 성공: $tcpResult" -ForegroundColor Cyan
+		   if ($tcpResult) {
+			   Write-Host "[성공] 유선 어댑터로 외부 인터넷 연결 확인됨" -ForegroundColor Green
+			   break
 		   }
 	   } while ($true)
 		Write-Host "`n[완료] 자동 재부팅 모드 종료, 인터넷 연결 복구됨."
