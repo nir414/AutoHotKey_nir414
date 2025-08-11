@@ -76,9 +76,11 @@ try {
             }
         }
     }
-} catch {
+}
+catch {
     Write-Host "[오류] 테스트 중 오류 발생: $_" -ForegroundColor Red
-} finally {
+}
+finally {
     if ($udpClient) {
         # 소켓 셧다운 후 닫기 및 Dispose로 자원 해제
         try { $udpClient.Client.Shutdown([System.Net.Sockets.SocketShutdown]::Both) } catch {}
